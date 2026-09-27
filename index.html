@@ -1,0 +1,2448 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f3ede2" />
+
+  <title>Mapa da Restauração Compartilhada</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --ivory: #f3ede2;
+      --paper: #fbf8f3;
+      --paper-2: #f8f2e9;
+      --brown: #3b261d;
+      --brown-2: #5b4033;
+      --gold: #b58b57;
+      --gold-soft: #d8c09c;
+      --line: #ded0bd;
+      --muted: #76685f;
+      --white: #ffffff;
+      --danger: #8b4b45;
+      --shadow: 0 18px 55px rgba(61, 39, 28, 0.09);
+      --radius: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--brown);
+      background:
+        radial-gradient(circle at 0% 0%, rgba(181,139,87,.13), transparent 28%),
+        radial-gradient(circle at 100% 100%, rgba(181,139,87,.09), transparent 30%),
+        var(--ivory);
+      font-family: "Manrope", sans-serif;
+      line-height: 1.6;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: .18;
+      background-image:
+        linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.2) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: linear-gradient(to bottom, black, transparent 75%);
+    }
+
+    h1, h2, h3 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      line-height: 1.05;
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 600;
+      letter-spacing: -.03em;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      font-size: clamp(2.25rem, 5vw, 3.5rem);
+      font-weight: 600;
+      letter-spacing: -.025em;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 1.65rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    p {
+      margin-top: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app-shell {
+      width: min(940px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 32px 0 80px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-mini {
+      text-align: center;
+      font-size: .75rem;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 22px;
+      font-weight: 700;
+    }
+
+    .screen {
+      display: none;
+      animation: fade .35s ease;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    @keyframes fade {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel {
+      background: rgba(251,248,243,.96);
+      border: 1px solid rgba(181,139,87,.24);
+      border-radius: 30px;
+      padding: clamp(24px, 5vw, 58px);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(6px);
+    }
+
+    .hero {
+      min-height: min(760px, 85vh);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "✦";
+      position: absolute;
+      top: 34px;
+      right: 42px;
+      color: var(--gold);
+      opacity: .45;
+      font-size: 2rem;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: .74rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+
+    .lead {
+      font-size: clamp(1.05rem, 2.5vw, 1.28rem);
+      color: var(--brown-2);
+      max-width: 730px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .small {
+      font-size: .86rem;
+    }
+
+    .gold-line {
+      width: 74px;
+      height: 1px;
+      background: var(--gold);
+      margin: 26px 0;
+    }
+
+    .progress-wrap {
+      margin-bottom: 26px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: .78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .progress {
+      height: 5px;
+      background: #e7dccd;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .progress > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold), #c9a676);
+      border-radius: 99px;
+      transition: width .3s ease;
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin: 16px 0;
+    }
+
+    .card.soft {
+      background: var(--paper-2);
+    }
+
+    .callout {
+      padding: 22px;
+      margin: 26px 0;
+      border-left: 3px solid var(--gold);
+      background: rgba(181,139,87,.08);
+      border-radius: 0 18px 18px 0;
+    }
+
+    .callout strong {
+      display: block;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.45rem;
+      line-height: 1.2;
+      margin-bottom: 5px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field {
+      margin: 24px 0;
+    }
+
+    .field label,
+    .field-title {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 9px;
+      color: var(--brown);
+    }
+
+    textarea,
+    input[type="text"],
+    select {
+      width: 100%;
+      border: 1px solid #d7c8b5;
+      background: #fffdf9;
+      color: var(--brown);
+      border-radius: 15px;
+      padding: 14px 15px;
+      outline: none;
+      transition: .2s;
+    }
+
+    textarea {
+      min-height: 115px;
+      resize: vertical;
+    }
+
+    textarea:focus,
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 4px rgba(181,139,87,.12);
+    }
+
+    .range-card {
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin: 13px 0;
+    }
+
+    .range-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 10px;
+    }
+
+    .range-label {
+      font-weight: 700;
+    }
+
+    .range-value {
+      min-width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      background: var(--brown);
+      color: white;
+      border-radius: 50%;
+      font-weight: 700;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--gold);
+    }
+
+    .range-hints {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: var(--muted);
+      font-size: .76rem;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .choice {
+      position: relative;
+    }
+
+    .choice input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      min-height: 100%;
+      padding: 16px;
+      border-radius: 17px;
+      border: 1px solid var(--line);
+      background: #fffdf9;
+      transition: .2s ease;
+      cursor: pointer;
+    }
+
+    .choice label::before {
+      content: "";
+      width: 19px;
+      height: 19px;
+      min-width: 19px;
+      border: 1.5px solid var(--gold);
+      border-radius: 5px;
+      margin-top: 2px;
+      transition: .2s;
+    }
+
+    .choice input:checked + label {
+      background: rgba(181,139,87,.11);
+      border-color: var(--gold);
+      box-shadow: 0 8px 22px rgba(181,139,87,.09);
+    }
+
+    .choice input:checked + label::before {
+      background: var(--gold);
+      box-shadow: inset 0 0 0 4px var(--paper);
+    }
+
+    .movement-grid {
+      display: grid;
+      gap: 14px;
+      margin: 22px 0;
+    }
+
+    .movement-option {
+      border: 1px solid var(--line);
+      background: #fffdf9;
+      border-radius: 20px;
+      padding: 20px;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .movement-option:hover {
+      border-color: var(--gold-soft);
+      transform: translateY(-1px);
+    }
+
+    .movement-option.selected {
+      border-color: var(--gold);
+      background: rgba(181,139,87,.09);
+      box-shadow: 0 10px 28px rgba(61,39,28,.07);
+    }
+
+    .movement-name {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.7rem;
+      font-weight: 700;
+      color: var(--brown);
+    }
+
+    .movement-quote {
+      font-weight: 600;
+      margin: 5px 0;
+    }
+
+    .movement-guide {
+      margin-top: 22px;
+      padding: 24px;
+      border-radius: 22px;
+      background: var(--brown);
+      color: #fdf8f0;
+    }
+
+    .movement-guide h3 {
+      color: #f7e7cf;
+    }
+
+    .movement-guide ul {
+      padding-left: 20px;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-weight: 700;
+      transition: .2s ease;
+      text-align: center;
+    }
+
+    .btn-primary {
+      color: #fffaf3;
+      background: var(--brown);
+      border: 1px solid var(--brown);
+    }
+
+    .btn-primary:hover {
+      background: #4b3025;
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      color: var(--brown);
+      background: transparent;
+      border: 1px solid var(--gold-soft);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(181,139,87,.08);
+    }
+
+    .btn-gold {
+      color: #2e2019;
+      background: linear-gradient(135deg, #d6bb91, #b58b57);
+    }
+
+    .btn-danger {
+      color: var(--danger);
+      background: transparent;
+      border: 1px solid rgba(139,75,69,.35);
+    }
+
+    .btn-wide {
+      width: 100%;
+      padding: 16px 22px;
+      font-size: 1rem;
+    }
+
+    .saved-box {
+      display: none;
+      margin-top: 28px;
+      padding: 20px;
+      border: 1px solid var(--gold-soft);
+      border-radius: 18px;
+      background: rgba(181,139,87,.08);
+    }
+
+    .saved-box.visible {
+      display: block;
+    }
+
+    .saved-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .summary-section {
+      border-top: 1px solid var(--line);
+      padding: 30px 0;
+    }
+
+    .summary-section:first-of-type {
+      border-top: 0;
+    }
+
+    .summary-title {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      padding: 15px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fffdf9;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 1.4rem;
+      color: var(--gold);
+    }
+
+    .territory-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .territory {
+      background: #fffdf9;
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      padding: 17px;
+    }
+
+    .territory b {
+      color: var(--gold);
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .anchor {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: clamp(1.9rem, 4vw, 2.6rem);
+      text-align: center;
+      padding: 36px 18px;
+      color: var(--brown);
+    }
+
+    .method-statement {
+      text-align: center;
+      border: 1px solid var(--gold-soft);
+      padding: 28px;
+      border-radius: 22px;
+      background: rgba(181,139,87,.07);
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 1.45rem;
+      line-height: 1.35;
+    }
+
+    .final-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 10px;
+      margin-top: 28px;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(30px);
+      background: var(--brown);
+      color: white;
+      border-radius: 999px;
+      padding: 11px 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: .25s;
+      z-index: 50;
+      box-shadow: var(--shadow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: .84rem;
+      font-weight: 700;
+      min-height: 1.3em;
+      margin-top: 8px;
+    }
+
+    .privacy-note {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 680px) {
+      .app-shell {
+        width: min(100% - 18px, 940px);
+        padding-top: 10px;
+      }
+
+      .panel {
+        padding: 24px 18px 30px;
+        border-radius: 22px;
+      }
+
+      .hero {
+        min-height: calc(100vh - 30px);
+      }
+
+      .choice-grid,
+      .grid.two,
+      .territory-grid,
+      .metric-grid,
+      .final-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-buttons {
+        flex-direction: column-reverse;
+      }
+
+      .nav-buttons .btn {
+        width: 100%;
+      }
+
+      .saved-actions {
+        flex-direction: column;
+      }
+
+      .saved-actions .btn {
+        width: 100%;
+      }
+    }
+
+    @media print {
+      body {
+        background: white !important;
+      }
+
+      body::before,
+      .no-print,
+      .nav-buttons,
+      .final-actions,
+      .progress-wrap,
+      .brand-mini {
+        display: none !important;
+      }
+
+      .app-shell {
+        width: 100%;
+        max-width: none;
+        padding: 0;
+      }
+
+      .screen {
+        display: none !important;
+      }
+
+      #screen-summary {
+        display: block !important;
+      }
+
+      #screen-summary .panel {
+        border: 0;
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .summary-section,
+      .territory,
+      .metric,
+      .method-statement {
+        break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <div class="brand-mini">Deus Restaura, Eu Reconquisto</div>
+
+  <!-- TELA 1 -->
+  <section class="screen active" id="screen-home">
+    <div class="panel hero">
+
+      <div class="eyebrow">Módulo 1 · O Mapa da Restauração</div>
+
+      <h1>Mapa da Restauração Compartilhada</h1>
+
+      <div class="gold-line"></div>
+
+      <p class="lead">
+        Entenda onde você está hoje, reconheça o que realmente está nas suas mãos
+        e encontre um próximo passo possível para a sua jornada.
+      </p>
+
+      <p class="muted">
+        Você não precisa resolver toda a sua história agora.
+        Comece apenas entendendo onde está.
+      </p>
+
+      <div style="margin-top:26px;">
+        <button class="btn btn-primary btn-wide" id="startButton">
+          COMEÇAR MEU MAPA
+        </button>
+      </div>
+
+      <div id="savedBox" class="saved-box">
+        <strong>Você já possui um mapa salvo neste dispositivo.</strong>
+
+        <p class="small muted" style="margin-top:7px;">
+          Você pode continuar de onde parou ou iniciar um novo mapa.
+        </p>
+
+        <div class="saved-actions">
+          <button class="btn btn-primary" id="continueSaved">
+            CONTINUAR MEU MAPA
+          </button>
+
+          <button class="btn btn-secondary" id="newMapHome">
+            CRIAR UM NOVO MAPA
+          </button>
+        </div>
+      </div>
+
+      <div class="privacy-note">
+        <strong>Sobre suas respostas:</strong>
+        esta versão funciona diretamente no seu navegador.
+        Suas respostas não são enviadas para um servidor por esta ferramenta.
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 2 -->
+  <section class="screen" id="screen-retrato">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Etapa 1 de 6</span>
+        <span>Meu retrato</span>
+      </div>
+      <div class="progress"><span style="width:16.6%"></span></div>
+    </div>
+
+    <div class="panel">
+
+      <div class="eyebrow">Perceber</div>
+
+      <h2>Meu Retrato de Hoje</h2>
+
+      <p class="lead">
+        Antes de pensar no que fazer, observe como você está.
+        Não existe resposta certa.
+      </p>
+
+      <div id="rangesContainer"></div>
+
+      <div class="field">
+        <label for="todayWord">
+          Se você pudesse resumir seu momento atual em uma palavra, qual seria?
+        </label>
+
+        <input
+          id="todayWord"
+          type="text"
+          placeholder="Ex.: confusa, cansada, esperançosa..."
+        />
+      </div>
+
+      <div class="callout">
+        <strong>Este mapa não é um diagnóstico.</strong>
+        Ele existe para ajudar você a perceber seu momento atual com mais clareza.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" data-go="home">VOLTAR</button>
+        <button class="btn btn-primary" data-go="mente">CONTINUAR</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 3 -->
+  <section class="screen" id="screen-mente">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Etapa 2 de 6</span>
+        <span>Minha mente</span>
+      </div>
+      <div class="progress"><span style="width:33.2%"></span></div>
+    </div>
+
+    <div class="panel">
+
+      <div class="eyebrow">Organizar</div>
+
+      <h2>O que está ocupando minha mente agora?</h2>
+
+      <p class="lead">
+        Quando muitas preocupações aparecem ao mesmo tempo, tudo parece urgente.
+        Escolha até três que mais ocupam seus pensamentos hoje.
+      </p>
+
+      <div id="concernChoices" class="choice-grid"></div>
+
+      <div id="concernError" class="error"></div>
+
+      <div id="otherConcernWrap" class="field hidden">
+        <label for="otherConcern">O que mais está ocupando sua mente?</label>
+        <input id="otherConcern" type="text" />
+      </div>
+
+      <div class="field">
+        <label for="primaryConcern">Qual dessas preocupações pesa mais hoje?</label>
+        <select id="primaryConcern">
+          <option value="">Selecione primeiro suas preocupações acima</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="concernQuestion">
+          Se pudesse transformar essa preocupação em uma pergunta, qual seria?
+        </label>
+
+        <textarea
+          id="concernQuestion"
+          placeholder="Ex.: Como saber se posso voltar a confiar?"
+        ></textarea>
+      </div>
+
+      <div class="callout">
+        <strong>Você não precisa responder todas as perguntas hoje.</strong>
+        Primeiro, precisamos entender qual delas está pedindo mais atenção.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" data-go="retrato">VOLTAR</button>
+        <button class="btn btn-primary" data-go="territorios">CONTINUAR</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 4 -->
+  <section class="screen" id="screen-territorios">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Etapa 3 de 6</span>
+        <span>4 territórios</span>
+      </div>
+      <div class="progress"><span style="width:49.8%"></span></div>
+    </div>
+
+    <div class="panel">
+
+      <div class="eyebrow">Separar</div>
+
+      <h2>Os 4 Territórios da Restauração</h2>
+
+      <p class="lead">
+        Nem tudo nesta história pertence a você.
+        Agora vamos separar aquilo que está nas suas mãos daquilo que não está.
+      </p>
+
+      <div class="card soft">
+        <h3>O que pertence a Deus</h3>
+        <p class="muted">
+          O futuro, respostas que ainda não chegaram e aquilo que você não consegue controlar.
+        </p>
+
+        <div class="field">
+          <label for="territoryGod">O que eu preciso entregar a Deus hoje?</label>
+          <textarea id="territoryGod"></textarea>
+        </div>
+      </div>
+
+      <div class="card soft">
+        <h3>O que pertence a mim</h3>
+        <p class="muted">
+          Meus limites, minhas escolhas, minha cura, meu cuidado e meu próximo passo.
+        </p>
+
+        <div class="field">
+          <label for="territoryMe">O que está nas minhas mãos neste momento?</label>
+          <textarea id="territoryMe"></textarea>
+        </div>
+      </div>
+
+      <div class="card soft">
+        <h3>O que pertence a ele</h3>
+        <p class="muted">
+          Responsabilidade, honestidade, mudança, transparência e participação real.
+        </p>
+
+        <div class="field">
+          <label for="territoryHim">
+            O que eu tenho tentado fazer ou resolver por ele?
+          </label>
+          <textarea id="territoryHim"></textarea>
+        </div>
+      </div>
+
+      <div class="card soft">
+        <h3>O que pertence aos dois</h3>
+        <p class="muted">
+          Comunicação, novos acordos, confiança, reconexão e reconstrução.
+        </p>
+
+        <div class="field">
+          <label for="territoryBoth">
+            O que precisa da participação dos dois para avançar?
+          </label>
+          <textarea id="territoryBoth"></textarea>
+        </div>
+      </div>
+
+      <div class="callout">
+        <strong>Restauração não é fazer a parte de todo mundo.</strong>
+        É reconhecer com clareza o que pertence a você, ao outro e a Deus.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" data-go="mente">VOLTAR</button>
+        <button class="btn btn-primary" data-go="movimento">CONTINUAR</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 5 -->
+  <section class="screen" id="screen-movimento">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Etapa 4 de 6</span>
+        <span>Meu movimento</span>
+      </div>
+      <div class="progress"><span style="width:66.4%"></span></div>
+    </div>
+
+    <div class="panel">
+
+      <div class="eyebrow">Identificar</div>
+
+      <h2>Em qual movimento da restauração eu estou?</h2>
+
+      <p class="lead">
+        A restauração não acontece toda de uma vez.
+        Escolha a etapa que mais se parece com o seu momento de hoje.
+      </p>
+
+      <div id="movementGrid" class="movement-grid"></div>
+
+      <div id="movementError" class="error"></div>
+
+      <div id="movementGuide" class="movement-guide hidden"></div>
+
+      <div class="callout">
+        <strong>Você não precisa estar em todas as etapas ao mesmo tempo.</strong>
+        Hoje, escolha apenas aquilo que mais precisa da sua atenção.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" data-go="territorios">VOLTAR</button>
+        <button class="btn btn-primary" id="movementContinue">CONTINUAR</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 6 -->
+  <section class="screen" id="screen-necessidades">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Etapa 5 de 6</span>
+        <span>Minha prioridade</span>
+      </div>
+      <div class="progress"><span style="width:83%"></span></div>
+    </div>
+
+    <div class="panel">
+
+      <div class="eyebrow">Direcionar</div>
+
+      <h2>Do que eu preciso agora?</h2>
+
+      <p class="lead">
+        Você já identificou onde está.
+        Agora escolha até duas necessidades que mais pedem sua atenção neste momento.
+      </p>
+
+      <div id="needChoices" class="choice-grid"></div>
+
+      <div id="needError" class="error"></div>
+
+      <div class="field">
+        <label id="needQuestionLabel" for="needAnswer"></label>
+        <textarea id="needAnswer"></textarea>
+      </div>
+
+      <div id="priorityPreview" class="callout hidden"></div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" data-go="movimento">VOLTAR</button>
+        <button class="btn btn-primary" id="needsContinue">CONTINUAR</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 7 -->
+  <section class="screen" id="screen-passo">
+
+    <div class="progress-wrap">
+      <div class="progress-meta">
+        <span>Etapa 6 de 6</span>
+        <span>Meu próximo passo</span>
+      </div>
+      <div class="progress"><span style="width:100%"></span></div>
+    </div>
+
+    <div class="panel">
+
+      <div class="eyebrow">Agir</div>
+
+      <h2>Meu Próximo Passo</h2>
+
+      <p class="lead">
+        Você não precisa sair deste mapa com todas as respostas.
+        Precisa apenas escolher um passo possível para hoje.
+      </p>
+
+      <div id="stepContext" class="callout"></div>
+
+      <div class="field">
+        <label for="firstStep">
+          Diante disso, o que faz mais sentido para você fazer primeiro?
+        </label>
+        <textarea id="firstStep"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="action24">
+          Qual ação possível você pode realizar nas próximas 24 horas?
+        </label>
+        <textarea id="action24"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="notToday">
+          O que você não vai tentar resolver hoje?
+        </label>
+        <textarea id="notToday"></textarea>
+      </div>
+
+      <div class="field">
+        <label for="anchorPhrase">
+          O que você quer lembrar quando sua mente voltar a ficar confusa?
+        </label>
+        <input
+          id="anchorPhrase"
+          type="text"
+          placeholder="Ex.: Eu posso dar um passo de cada vez."
+        />
+      </div>
+
+      <div class="callout">
+        <strong>Clareza não é saber como toda a história termina.</strong>
+        É saber qual é o próximo passo que faz sentido agora.
+      </div>
+
+      <div class="nav-buttons">
+        <button class="btn btn-secondary" data-go="necessidades">VOLTAR</button>
+        <button class="btn btn-gold" id="generateMap">GERAR MEU MAPA</button>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- TELA 8 -->
+  <section class="screen" id="screen-summary">
+
+    <div class="panel">
+
+      <div class="eyebrow">Seu mapa foi construído</div>
+
+      <h2>Meu Mapa de Hoje</h2>
+
+      <p class="lead">
+        Este é o retrato do seu momento atual.
+        Ele não define toda a sua história.
+        Apenas mostra onde sua atenção precisa estar agora.
+      </p>
+
+      <div id="summaryContent"></div>
+
+      <div class="method-statement">
+        <strong>Deus restaura aquilo que está além do seu controle.</strong><br><br>
+        Você reconquista aquilo que está ao seu alcance.<br><br>
+        E o casamento, quando existe disposição, é reconstruído pelos dois.
+      </div>
+
+      <div class="final-actions no-print">
+
+        <button class="btn btn-primary" id="saveMap">
+          SALVAR MEU MAPA
+        </button>
+
+        <button class="btn btn-secondary" id="printMap">
+          BAIXAR OU IMPRIMIR
+        </button>
+
+        <button class="btn btn-secondary" id="redoMap">
+          REFAZER MEU MAPA
+        </button>
+
+        <button class="btn btn-danger" id="deleteMap">
+          APAGAR MINHAS RESPOSTAS
+        </button>
+
+      </div>
+
+      <div style="margin-top:14px;" class="no-print">
+        <button class="btn btn-gold btn-wide" id="backToCourse">
+          CONCLUÍ MEU MAPA
+        </button>
+
+        <p class="small muted" style="text-align:center; margin-top:10px;">
+          Você pode fechar esta página e continuar sua jornada na área de membros.
+        </p>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+
+<script>
+  const STORAGE_KEY = "mapa_restauracao_compartilhada_v1";
+
+  /*
+    No futuro, se quiser que o botão final leve a uma URL específica da Kiwify,
+    coloque o link abaixo.
+  */
+  const COURSE_URL = "";
+
+  const scales = [
+    {
+      key: "pain",
+      label: "Dor emocional",
+      min: "quase nenhuma dor",
+      max: "dor muito intensa"
+    },
+    {
+      key: "clarity",
+      label: "Clareza sobre o que estou vivendo",
+      min: "muito confusa",
+      max: "muita clareza"
+    },
+    {
+      key: "peace",
+      label: "Paz interior",
+      min: "muito agitada",
+      max: "muita paz"
+    },
+    {
+      key: "selfEsteem",
+      label: "Autoestima",
+      min: "me sinto sem valor",
+      max: "reconheço meu valor"
+    },
+    {
+      key: "trust",
+      label: "Confiança na relação",
+      min: "não consigo confiar",
+      max: "sinto confiança"
+    },
+    {
+      key: "safety",
+      label: "Sensação de segurança",
+      min: "não me sinto segura",
+      max: "me sinto segura"
+    },
+    {
+      key: "faith",
+      label: "Proximidade com Deus",
+      min: "me sinto distante",
+      max: "me sinto próxima"
+    }
+  ];
+
+  const concerns = [
+    "Medo de que isso aconteça novamente",
+    "Dúvidas sobre o que realmente aconteceu",
+    "Vontade de saber tudo agora",
+    "Medo de perder meu casamento",
+    "Raiva pelo que aconteceu",
+    "Comparação com outra pessoa",
+    "Sensação de não ter sido suficiente",
+    "Dificuldade de confiar novamente",
+    "Medo de tomar a decisão errada",
+    "Preocupação com meus filhos ou família",
+    "Dúvidas sobre ficar ou seguir em frente",
+    "Necessidade de entender se existe mudança real",
+    "Outro"
+  ];
+
+  const movementData = {
+
+    estabilizar: {
+      name: "ESTABILIZAR",
+      quote: "Eu ainda preciso recuperar meu chão.",
+
+      short:
+        "Seu foco agora é recuperar chão emocional antes de tentar resolver toda a história.",
+
+      meaning:
+        "Você pode estar vivendo emoções intensas, ansiedade, urgência por respostas ou dificuldade para pensar com clareza.",
+
+      focus: [
+        "recuperar sensação de segurança",
+        "acalmar mente e corpo",
+        "reduzir decisões impulsivas",
+        "buscar apoio seguro"
+      ],
+
+      avoid: [
+        "tentar resolver tudo imediatamente",
+        "tomar grandes decisões no auge da emoção",
+        "buscar respostas compulsivamente"
+      ],
+
+      suggestion:
+        "Escolha hoje uma atitude pequena que ajude você a recuperar estabilidade.",
+
+      needQuestion:
+        "O que faria você se sentir um pouco mais segura hoje?",
+
+      needs: [
+        "Acalmar minha mente antes de tomar decisões",
+        "Recuperar sensação de segurança",
+        "Dormir e descansar melhor",
+        "Parar de buscar respostas compulsivamente",
+        "Organizar minhas emoções",
+        "Encontrar alguém seguro com quem conversar",
+        "Voltar aos fatos quando o medo aumentar",
+        "Me aproximar de Deus sem precisar fingir que estou bem"
+      ]
+    },
+
+    discernir: {
+      name: "DISCERNIR",
+      quote: "Eu preciso entender melhor o que está acontecendo.",
+
+      short:
+        "Seu foco agora é observar a realidade com calma, sem deixar que apenas medo ou esperança decidam por você.",
+
+      meaning:
+        "Talvez você já tenha recuperado algum chão, mas ainda precise compreender melhor fatos, comportamentos e sinais.",
+
+      focus: [
+        "separar fatos de hipóteses",
+        "observar atitudes",
+        "avaliar consistência",
+        "dar tempo para a realidade aparecer"
+      ],
+
+      avoid: [
+        "decidir apenas pelo medo de perder",
+        "tratar promessas como prova de mudança",
+        "preencher lacunas com suposições"
+      ],
+
+      suggestion:
+        "Escolha uma coisa que você ainda precisa observar antes de tomar uma decisão importante.",
+
+      needQuestion:
+        "O que você ainda precisa observar antes de decidir algo importante?",
+
+      needs: [
+        "Separar fatos de hipóteses",
+        "Observar atitudes além das palavras",
+        "Entender se existe responsabilidade verdadeira",
+        "Perceber se há mudança consistente",
+        "Identificar limites que precisam ser colocados",
+        "Parar de decidir apenas pelo medo de perder",
+        "Dar tempo para a realidade ficar mais clara",
+        "Pedir sabedoria antes de tomar uma decisão"
+      ]
+    },
+
+    curar: {
+      name: "CURAR",
+      quote: "Eu preciso cuidar daquilo que isso provocou em mim.",
+
+      short:
+        "Seu foco agora é voltar sua atenção para aquilo que esta experiência provocou em você.",
+
+      meaning:
+        "Talvez parte da situação já esteja mais clara, mas autoestima, culpa, medo, comparação ou identidade ainda estejam feridos.",
+
+      focus: [
+        "recuperar autoestima",
+        "trabalhar culpa indevida",
+        "cuidar da comparação",
+        "reconstruir identidade"
+      ],
+
+      avoid: [
+        "exigir de si mesma uma recuperação imediata",
+        "usar outra pessoa como medida do seu valor",
+        "carregar escolhas que não pertencem a você"
+      ],
+
+      suggestion:
+        "Escolha uma área interna que precisa receber mais cuidado hoje.",
+
+      needQuestion:
+        "Qual parte de você mais precisa de cuidado hoje?",
+
+      needs: [
+        "Recuperar minha autoestima",
+        "Parar de me comparar",
+        "Trabalhar culpa que não me pertence",
+        "Cuidar da minha raiva",
+        "Reconstruir minha identidade",
+        "Recuperar minha paz interior",
+        "Voltar a confiar em mim mesma",
+        "Me reconectar com minha fé e comigo"
+      ]
+    },
+
+    reconectar: {
+      name: "RECONECTAR",
+      quote: "Existe disposição dos dois para reconstruir.",
+
+      short:
+        "Seu foco agora é perceber se os dois estão transformando intenção em atitudes concretas de reconstrução.",
+
+      meaning:
+        "Existe alguma segurança e disposição mútua para começar a reconstruir comunicação, proximidade, confiança e novos acordos.",
+
+      focus: [
+        "comunicação",
+        "novos acordos",
+        "confiança gradual",
+        "participação dos dois"
+      ],
+
+      avoid: [
+        "tentar reconstruir sozinha",
+        "confundir reconexão com esquecer rapidamente",
+        "forçar intimidade antes de existir segurança"
+      ],
+
+      suggestion:
+        "Escolha uma pequena ação de reconstrução que dependa da participação dos dois.",
+
+      needQuestion:
+        "O que precisaria acontecer para você sentir que a reconexão está sendo construída pelos dois?",
+
+      needs: [
+        "Voltar a conversar sem transformar tudo em confronto",
+        "Criar novos acordos",
+        "Reconstruir confiança aos poucos",
+        "Recuperar proximidade emocional",
+        "Aprender a falar sobre a ferida sem viver somente nela",
+        "Perceber se os dois estão realmente participando",
+        "Retomar pequenos momentos de conexão",
+        "Trabalhar limites e transparência juntos"
+      ]
+    },
+
+    blindar: {
+      name: "BLINDAR",
+      quote: "Estamos construindo uma nova forma de viver a relação.",
+
+      short:
+        "Seu foco agora é fortalecer aquilo que está sendo reconstruído e evitar que antigos padrões voltem a governar a relação.",
+
+      meaning:
+        "O momento mais agudo pode ter passado e agora o casal precisa proteger os avanços com consciência, consistência e novos hábitos.",
+
+      focus: [
+        "fortalecer novos acordos",
+        "manter conversas importantes",
+        "preservar limites",
+        "cultivar confiança e conexão"
+      ],
+
+      avoid: [
+        "acreditar que já passou e parar de cuidar",
+        "abandonar limites para evitar conversas difíceis",
+        "voltar automaticamente aos antigos padrões"
+      ],
+
+      suggestion:
+        "Escolha uma área da relação que precisa continuar sendo fortalecida nesta semana.",
+
+      needQuestion:
+        "Qual área da relação precisa continuar sendo fortalecida?",
+
+      needs: [
+        "Fortalecer os acordos que já criamos",
+        "Manter conversas importantes abertas",
+        "Identificar padrões antigos antes que retornem",
+        "Preservar limites saudáveis",
+        "Cuidar da conexão mesmo quando tudo parece bem",
+        "Fortalecer confiança por meio de consistência",
+        "Criar hábitos que protejam a relação",
+        "Continuar crescendo individualmente e como casal"
+      ]
+    }
+  };
+
+  function initialState() {
+    return {
+      started: false,
+      currentScreen: "home",
+
+      scales: {
+        pain: 5,
+        clarity: 5,
+        peace: 5,
+        selfEsteem: 5,
+        trust: 5,
+        safety: 5,
+        faith: 5
+      },
+
+      todayWord: "",
+
+      concerns: [],
+      otherConcern: "",
+      primaryConcern: "",
+      concernQuestion: "",
+
+      territories: {
+        god: "",
+        me: "",
+        him: "",
+        both: ""
+      },
+
+      movement: "",
+
+      needs: [],
+      needAnswer: "",
+
+      firstStep: "",
+      action24: "",
+      notToday: "",
+      anchorPhrase: ""
+    };
+  }
+
+  let state = loadState() || initialState();
+
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function hasSavedMap() {
+    return Boolean(loadState()?.started);
+  }
+
+  function escapeHTML(value = "") {
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    clearTimeout(showToast.timer);
+
+    showToast.timer = setTimeout(() => {
+      toast.classList.remove("show");
+    }, 2600);
+  }
+
+  function showScreen(name) {
+    document.querySelectorAll(".screen").forEach(screen => {
+      screen.classList.remove("active");
+    });
+
+    const screen = document.getElementById("screen-" + name);
+
+    if (screen) {
+      screen.classList.add("active");
+
+      state.currentScreen = name;
+
+      if (state.started) {
+        saveState();
+      }
+
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+
+    if (name === "necessidades") {
+      renderNeeds();
+    }
+
+    if (name === "passo") {
+      renderStepContext();
+    }
+
+    if (name === "summary") {
+      collectAllFields();
+      renderSummary();
+    }
+  }
+
+  function renderSavedBox() {
+    const box = document.getElementById("savedBox");
+
+    if (hasSavedMap()) {
+      box.classList.add("visible");
+      document.getElementById("startButton").classList.add("hidden");
+    } else {
+      box.classList.remove("visible");
+      document.getElementById("startButton").classList.remove("hidden");
+    }
+  }
+
+  function renderRanges() {
+    const container = document.getElementById("rangesContainer");
+    container.innerHTML = "";
+
+    scales.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "range-card";
+
+      card.innerHTML = `
+        <div class="range-head">
+          <div class="range-label">${item.label}</div>
+          <div class="range-value" id="value-${item.key}">
+            ${state.scales[item.key]}
+          </div>
+        </div>
+
+        <input
+          type="range"
+          min="0"
+          max="10"
+          step="1"
+          value="${state.scales[item.key]}"
+          data-range="${item.key}"
+          aria-label="${item.label}"
+        >
+
+        <div class="range-hints">
+          <span>0 · ${item.min}</span>
+          <span>10 · ${item.max}</span>
+        </div>
+      `;
+
+      container.appendChild(card);
+    });
+
+    document.querySelectorAll("[data-range]").forEach(range => {
+      range.addEventListener("input", event => {
+        const key = event.target.dataset.range;
+        const value = Number(event.target.value);
+
+        state.scales[key] = value;
+
+        document.getElementById("value-" + key).textContent = value;
+
+        saveState();
+      });
+    });
+  }
+
+  function renderConcerns() {
+    const container = document.getElementById("concernChoices");
+
+    container.innerHTML = concerns.map((item, index) => `
+      <div class="choice">
+        <input
+          type="checkbox"
+          id="concern-${index}"
+          value="${escapeHTML(item)}"
+          ${state.concerns.includes(item) ? "checked" : ""}
+        >
+        <label for="concern-${index}">
+          ${escapeHTML(item)}
+        </label>
+      </div>
+    `).join("");
+
+    container.querySelectorAll("input").forEach(input => {
+
+      input.addEventListener("change", event => {
+
+        const selected = [...container.querySelectorAll("input:checked")]
+          .map(el => el.value);
+
+        if (selected.length > 3) {
+          event.target.checked = false;
+
+          document.getElementById("concernError").textContent =
+            "Escolha no máximo 3 opções.";
+
+          return;
+        }
+
+        document.getElementById("concernError").textContent = "";
+
+        state.concerns = selected;
+
+        updateOtherConcern();
+
+        updatePrimaryConcern();
+
+        saveState();
+      });
+    });
+
+    updateOtherConcern();
+
+    updatePrimaryConcern();
+  }
+
+  function updateOtherConcern() {
+    const wrap = document.getElementById("otherConcernWrap");
+
+    if (state.concerns.includes("Outro")) {
+      wrap.classList.remove("hidden");
+    } else {
+      wrap.classList.add("hidden");
+      state.otherConcern = "";
+    }
+  }
+
+  function updatePrimaryConcern() {
+    const select = document.getElementById("primaryConcern");
+
+    const options = state.concerns.map(item => {
+
+      const label =
+        item === "Outro" && state.otherConcern
+          ? state.otherConcern
+          : item;
+
+      return `
+        <option
+          value="${escapeHTML(item)}"
+          ${state.primaryConcern === item ? "selected" : ""}
+        >
+          ${escapeHTML(label)}
+        </option>
+      `;
+    }).join("");
+
+    select.innerHTML =
+      `<option value="">Selecione</option>` + options;
+  }
+
+  function renderMovements() {
+    const grid = document.getElementById("movementGrid");
+
+    grid.innerHTML = Object.entries(movementData)
+      .map(([key, movement]) => `
+        <div
+          class="movement-option ${state.movement === key ? "selected" : ""}"
+          data-movement="${key}"
+          tabindex="0"
+          role="button"
+        >
+          <div class="movement-name">${movement.name}</div>
+          <div class="movement-quote">${movement.quote}</div>
+          <div class="small muted">${movement.meaning}</div>
+        </div>
+      `)
+      .join("");
+
+    grid.querySelectorAll(".movement-option").forEach(option => {
+
+      function choose() {
+        state.movement = option.dataset.movement;
+
+        grid.querySelectorAll(".movement-option").forEach(el => {
+          el.classList.remove("selected");
+        });
+
+        option.classList.add("selected");
+
+        document.getElementById("movementError").textContent = "";
+
+        renderMovementGuide();
+
+        saveState();
+      }
+
+      option.addEventListener("click", choose);
+
+      option.addEventListener("keydown", event => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          choose();
+        }
+      });
+    });
+
+    renderMovementGuide();
+  }
+
+  function renderMovementGuide() {
+    const guide = document.getElementById("movementGuide");
+
+    if (!state.movement) {
+      guide.classList.add("hidden");
+      return;
+    }
+
+    const item = movementData[state.movement];
+
+    guide.innerHTML = `
+      <h3>Seu movimento de hoje: ${item.name}</h3>
+
+      <p>${item.short}</p>
+
+      <strong>Seu foco agora:</strong>
+      <ul>
+        ${item.focus.map(value => `<li>${value}</li>`).join("")}
+      </ul>
+
+      <strong>Evite neste momento:</strong>
+      <ul>
+        ${item.avoid.map(value => `<li>${value}</li>`).join("")}
+      </ul>
+
+      <strong>Um próximo passo:</strong>
+      <p>${item.suggestion}</p>
+    `;
+
+    guide.classList.remove("hidden");
+  }
+
+  function renderNeeds() {
+    if (!state.movement) {
+      showScreen("movimento");
+      return;
+    }
+
+    const data = movementData[state.movement];
+
+    document.getElementById("needQuestionLabel").textContent =
+      data.needQuestion;
+
+    const container = document.getElementById("needChoices");
+
+    container.innerHTML = data.needs.map((item, index) => `
+      <div class="choice">
+        <input
+          type="checkbox"
+          id="need-${index}"
+          value="${escapeHTML(item)}"
+          ${state.needs.includes(item) ? "checked" : ""}
+        >
+
+        <label for="need-${index}">
+          ${escapeHTML(item)}
+        </label>
+      </div>
+    `).join("");
+
+    container.querySelectorAll("input").forEach(input => {
+
+      input.addEventListener("change", event => {
+
+        const selected = [...container.querySelectorAll("input:checked")]
+          .map(el => el.value);
+
+        if (selected.length > 2) {
+          event.target.checked = false;
+
+          document.getElementById("needError").textContent =
+            "Escolha no máximo 2 prioridades.";
+
+          return;
+        }
+
+        document.getElementById("needError").textContent = "";
+
+        state.needs = selected;
+
+        renderPriorityPreview();
+
+        saveState();
+      });
+    });
+
+    renderPriorityPreview();
+  }
+
+  function renderPriorityPreview() {
+    const preview = document.getElementById("priorityPreview");
+
+    if (!state.needs.length) {
+      preview.classList.add("hidden");
+      return;
+    }
+
+    preview.innerHTML = `
+      <strong>Sua prioridade de agora</strong>
+
+      ${state.needs.map(value =>
+        `<div>✓ ${escapeHTML(value)}</div>`
+      ).join("")}
+
+      <div class="small" style="margin-top:9px;">
+        Você não precisa trabalhar tudo ao mesmo tempo.
+      </div>
+    `;
+
+    preview.classList.remove("hidden");
+  }
+
+  function renderStepContext() {
+    if (!state.movement) return;
+
+    const movement = movementData[state.movement];
+
+    document.getElementById("stepContext").innerHTML = `
+      <strong>Seu movimento atual: ${movement.name}</strong>
+
+      <div>${movement.short}</div>
+
+      ${
+        state.needs.length
+        ? `
+          <div style="margin-top:12px;">
+            <b>Suas prioridades:</b><br>
+            ${state.needs.map(value => `✓ ${escapeHTML(value)}`).join("<br>")}
+          </div>
+        `
+        : ""
+      }
+    `;
+  }
+
+  function collectAllFields() {
+
+    state.todayWord =
+      document.getElementById("todayWord")?.value || state.todayWord;
+
+    state.otherConcern =
+      document.getElementById("otherConcern")?.value || state.otherConcern;
+
+    state.primaryConcern =
+      document.getElementById("primaryConcern")?.value || state.primaryConcern;
+
+    state.concernQuestion =
+      document.getElementById("concernQuestion")?.value || state.concernQuestion;
+
+    state.territories.god =
+      document.getElementById("territoryGod")?.value || state.territories.god;
+
+    state.territories.me =
+      document.getElementById("territoryMe")?.value || state.territories.me;
+
+    state.territories.him =
+      document.getElementById("territoryHim")?.value || state.territories.him;
+
+    state.territories.both =
+      document.getElementById("territoryBoth")?.value || state.territories.both;
+
+    state.needAnswer =
+      document.getElementById("needAnswer")?.value || state.needAnswer;
+
+    state.firstStep =
+      document.getElementById("firstStep")?.value || state.firstStep;
+
+    state.action24 =
+      document.getElementById("action24")?.value || state.action24;
+
+    state.notToday =
+      document.getElementById("notToday")?.value || state.notToday;
+
+    state.anchorPhrase =
+      document.getElementById("anchorPhrase")?.value || state.anchorPhrase;
+
+    saveState();
+  }
+
+  function hydrateFields() {
+
+    document.getElementById("todayWord").value =
+      state.todayWord || "";
+
+    document.getElementById("otherConcern").value =
+      state.otherConcern || "";
+
+    document.getElementById("concernQuestion").value =
+      state.concernQuestion || "";
+
+    document.getElementById("territoryGod").value =
+      state.territories.god || "";
+
+    document.getElementById("territoryMe").value =
+      state.territories.me || "";
+
+    document.getElementById("territoryHim").value =
+      state.territories.him || "";
+
+    document.getElementById("territoryBoth").value =
+      state.territories.both || "";
+
+    document.getElementById("needAnswer").value =
+      state.needAnswer || "";
+
+    document.getElementById("firstStep").value =
+      state.firstStep || "";
+
+    document.getElementById("action24").value =
+      state.action24 || "";
+
+    document.getElementById("notToday").value =
+      state.notToday || "";
+
+    document.getElementById("anchorPhrase").value =
+      state.anchorPhrase || "";
+  }
+
+  function displayValue(value) {
+    return value && value.trim()
+      ? escapeHTML(value)
+      : "<span class='muted'>Não preenchido</span>";
+  }
+
+  function renderSummary() {
+
+    const movement =
+      movementData[state.movement] || {
+        name: "Não selecionado",
+        short: ""
+      };
+
+    const primary =
+      state.primaryConcern === "Outro"
+        ? state.otherConcern
+        : state.primaryConcern;
+
+    const metricNames = {
+      pain: "Dor emocional",
+      clarity: "Clareza",
+      peace: "Paz interior",
+      selfEsteem: "Autoestima",
+      trust: "Confiança",
+      safety: "Segurança",
+      faith: "Proximidade com Deus"
+    };
+
+    const metrics = Object.entries(metricNames)
+      .map(([key, label]) => `
+        <div class="metric">
+          <span>${label}</span>
+          <strong>${state.scales[key]}/10</strong>
+        </div>
+      `)
+      .join("");
+
+    const needs = state.needs.length
+      ? state.needs.map(value =>
+          `<div>✓ ${escapeHTML(value)}</div>`
+        ).join("")
+      : "<span class='muted'>Nenhuma prioridade selecionada.</span>";
+
+    document.getElementById("summaryContent").innerHTML = `
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          Como eu estou hoje
+        </div>
+
+        <div class="metric-grid">
+          ${metrics}
+        </div>
+
+        <div class="card">
+          <b>Minha palavra de hoje:</b><br>
+          ${displayValue(state.todayWord)}
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          O que mais está pesando
+        </div>
+
+        <div class="card">
+          <b>Minha principal preocupação:</b><br>
+          ${displayValue(primary)}
+        </div>
+
+        <div class="card">
+          <b>A pergunta que está dentro de mim:</b><br>
+          ${displayValue(state.concernQuestion)}
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          O que é meu e o que não é
+        </div>
+
+        <div class="territory-grid">
+
+          <div class="territory">
+            <b>Entrego a Deus</b>
+            <p>${displayValue(state.territories.god)}</p>
+          </div>
+
+          <div class="territory">
+            <b>Está nas minhas mãos</b>
+            <p>${displayValue(state.territories.me)}</p>
+          </div>
+
+          <div class="territory">
+            <b>Pertence a ele</b>
+            <p>${displayValue(state.territories.him)}</p>
+          </div>
+
+          <div class="territory">
+            <b>Precisa dos dois</b>
+            <p>${displayValue(state.territories.both)}</p>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          Meu movimento atual
+        </div>
+
+        <div class="movement-guide">
+          <h3>${movement.name}</h3>
+          <p>${movement.short}</p>
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          Minhas prioridades
+        </div>
+
+        <div class="card">
+          ${needs}
+        </div>
+
+        <div class="card">
+          <b>Minha percepção:</b><br>
+          ${displayValue(state.needAnswer)}
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          Meu próximo passo
+        </div>
+
+        <div class="card">
+          <b>O primeiro passo que escolhi:</b><br>
+          ${displayValue(state.firstStep)}
+        </div>
+
+        <div class="card">
+          <b>Nas próximas 24 horas eu vou:</b><br>
+          ${displayValue(state.action24)}
+        </div>
+
+        <div class="card">
+          <b>Hoje eu não preciso resolver:</b><br>
+          ${displayValue(state.notToday)}
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          Minha frase de âncora
+        </div>
+
+        <div class="anchor">
+          “${escapeHTML(state.anchorPhrase || "Um passo de cada vez.")}”
+        </div>
+
+      </div>
+
+
+      <div class="summary-section">
+
+        <div class="summary-title">
+          Seu direcionamento para agora
+        </div>
+
+        <div class="callout">
+          <strong>${movement.name}</strong>
+          ${movement.short}
+        </div>
+
+      </div>
+    `;
+  }
+
+  function resetMap() {
+    localStorage.removeItem(STORAGE_KEY);
+
+    state = initialState();
+
+    renderRanges();
+    renderConcerns();
+    renderMovements();
+    hydrateFields();
+    renderSavedBox();
+
+    showScreen("home");
+  }
+
+  function bindAutoSaveFields() {
+
+    [
+      "todayWord",
+      "otherConcern",
+      "primaryConcern",
+      "concernQuestion",
+      "territoryGod",
+      "territoryMe",
+      "territoryHim",
+      "territoryBoth",
+      "needAnswer",
+      "firstStep",
+      "action24",
+      "notToday",
+      "anchorPhrase"
+    ].forEach(id => {
+
+      const element = document.getElementById(id);
+
+      if (!element) return;
+
+      element.addEventListener("input", () => {
+
+        collectAllFields();
+
+        if (id === "otherConcern") {
+          updatePrimaryConcern();
+        }
+      });
+
+      element.addEventListener("change", collectAllFields);
+    });
+  }
+
+  document.getElementById("startButton")
+    .addEventListener("click", () => {
+
+      state.started = true;
+      state.currentScreen = "retrato";
+
+      saveState();
+
+      showScreen("retrato");
+    });
+
+  document.getElementById("continueSaved")
+    .addEventListener("click", () => {
+
+      state = loadState() || initialState();
+
+      renderRanges();
+      renderConcerns();
+      renderMovements();
+      hydrateFields();
+
+      showScreen(
+        state.currentScreen &&
+        state.currentScreen !== "home"
+          ? state.currentScreen
+          : "retrato"
+      );
+    });
+
+  document.getElementById("newMapHome")
+    .addEventListener("click", () => {
+
+      const confirmNew = confirm(
+        "Deseja iniciar um novo mapa? Seu mapa salvo atual será substituído."
+      );
+
+      if (!confirmNew) return;
+
+      resetMap();
+
+      state.started = true;
+      saveState();
+
+      showScreen("retrato");
+    });
+
+  document.querySelectorAll("[data-go]")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        collectAllFields();
+
+        showScreen(button.dataset.go);
+      });
+    });
+
+  document.getElementById("movementContinue")
+    .addEventListener("click", () => {
+
+      if (!state.movement) {
+
+        document.getElementById("movementError").textContent =
+          "Escolha o movimento que mais representa seu momento.";
+
+        return;
+      }
+
+      showScreen("necessidades");
+    });
+
+  document.getElementById("needsContinue")
+    .addEventListener("click", () => {
+
+      if (!state.needs.length) {
+
+        document.getElementById("needError").textContent =
+          "Escolha pelo menos uma prioridade.";
+
+        return;
+      }
+
+      collectAllFields();
+
+      showScreen("passo");
+    });
+
+  document.getElementById("generateMap")
+    .addEventListener("click", () => {
+
+      collectAllFields();
+
+      showScreen("summary");
+    });
+
+  document.getElementById("saveMap")
+    .addEventListener("click", () => {
+
+      collectAllFields();
+
+      state.started = true;
+
+      saveState();
+
+      showToast("Seu mapa foi salvo neste dispositivo.");
+    });
+
+  document.getElementById("printMap")
+    .addEventListener("click", () => {
+
+      collectAllFields();
+
+      renderSummary();
+
+      window.print();
+    });
+
+  document.getElementById("redoMap")
+    .addEventListener("click", () => {
+
+      const proceed = confirm(
+        "Deseja começar um novo mapa? Recomendamos imprimir ou salvar o mapa atual antes."
+      );
+
+      if (!proceed) return;
+
+      resetMap();
+
+      state.started = true;
+
+      saveState();
+
+      showScreen("retrato");
+    });
+
+  document.getElementById("deleteMap")
+    .addEventListener("click", () => {
+
+      const proceed = confirm(
+        "Tem certeza? Suas respostas salvas neste navegador serão apagadas e não poderão ser recuperadas."
+      );
+
+      if (!proceed) return;
+
+      resetMap();
+
+      showToast("Suas respostas foram apagadas deste dispositivo.");
+    });
+
+  document.getElementById("backToCourse")
+    .addEventListener("click", () => {
+
+      collectAllFields();
+      saveState();
+
+      if (COURSE_URL) {
+        window.location.href = COURSE_URL;
+        return;
+      }
+
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        alert(
+          "Seu mapa está concluído. Você pode fechar esta aba e continuar sua aula."
+        );
+      }
+    });
+
+  /*
+    Inicialização
+  */
+
+  renderRanges();
+  renderConcerns();
+  renderMovements();
+  hydrateFields();
+  bindAutoSaveFields();
+  renderSavedBox();
+
+</script>
+
+</body>
+</html>
